@@ -2,39 +2,39 @@
   "version": 1,
   "texts": [
     [
-      "Hi",
-      "I16",
-      "N31",
-      "G46",
-      "O61"
+      "State was living in random variables. Refresh the page and everybody’s cart vanished.",
+      "Installed whatever package shut the error up. No idea what half of them do.",
+      "Skipped auth completely. “It’s just a prototype” is my favourite security policy.",
+      "Architecture? Bro I just kept regenerating until the errors stopped screaming.",
+      "Had zero way of knowing why it broke… until it broke live on stage."
     ],
     [
-      "B2",
-      "I17",
-      "N32",
-      "G47",
-      "O62"
+      "Was just happy it produced *a* result. Correct result was optional.",
+      "Built the whole thing for one player and prayed multiplayer would appear by magic.",
+      "Stored whatever random data the API spat out. Schema? That’s corporate talk.",
+      "Only tested the perfect path. Real users? That’s their problem, not mine.",
+      "Let random packages decide the tech stack. Intentional design? Never met her."
     ],
     [
-      "B3",
-      "I18",
+      "Completely ignored what happens when the WiFi drops mid-use. Chaos incoming.",
+      "Celebrated hard because it ran on my laptop. Deployment was a tomorrow problem.",
       "FREE",
-      "G48",
-      "O63"
+      "Assumed concurrency was for “real” apps, not our little app thing.",
+      "Kept saying “AI can just regenerate it” every time the code looked cursed."
     ],
     [
-      "B4",
-      "I19",
-      "N34",
-      "G49",
-      "O64"
+      "Built the most generic app ever and hoped uniqueness would show up later.",
+      "Testing strategy: “I clicked it a few times and it looked cute.”",
+      "Told the AI “just make the button work” and acted shocked when the whole app had no logic.",
+      "Cared more about looking clever than making the actual rules correct.",
+      "Skipped every trade-off conversation because the deadline was breathing down my neck."
     ],
     [
-      "B5",
-      "I20",
-      "N35",
-      "G50",
-      "O65"
+      "Tested with 4 users. Scaling to a room full of people felt like overthinking.",
+      "Took the first thing that worked and called it innovation.",
+      "Added logs only after the demo crashed in front of the judges. Classic.",
+      "“It works on my machine” was the entire deployment strategy.",
+      "Refused to look at existing apps so I could “stay original.” Ended up basic."
     ]
   ],
   "marked": [
