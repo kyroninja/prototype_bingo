@@ -37,6 +37,11 @@ text wraps and shrinks to fit instead of overflowing.
 -   **Editable cell text.** Click "Edit Text" (or press `E`), then click
     any cell to retype its label. A small popup opens; type and hit
     Enter.
+-   **Shuffle.** Randomly rearranges the 24 non-center labels, clears all
+    selections while keeping the center `FREE` square marked, and saves the
+    updated board. The Shuffle button can be used once per app session; it
+    stays disabled until the app is restarted. The text-fitting cache is
+    cleared so the shuffled labels are fitted again.
 -   **Text that fits itself.** Long labels wrap onto multiple lines and
     shrink automatically. If a label is still too long at the minimum
     readable size, it gets truncated with `…`.
@@ -114,6 +119,7 @@ whatever space is available; buttons and text scale with it.
 | Cancel a text edit | Press `Esc` in the popup box |
 | Clear the popup's text | Press `Delete` in the popup box |
 | Clear all marks | Click "Reset Marks" or press `R` |
+| Shuffle labels and clear marks | Click "Shuffle" (once per app session) |
 | Quit | Close the window |
 
 The FREE center square stays marked when you reset. Marks and edits are
@@ -414,4 +420,6 @@ text
 
 ## Changelog
 
-No entries yet.
+- Added a one-use Shuffle button that rearranges the 24 non-center labels,
+  clears selections while keeping `FREE` marked, saves the board, and disables
+  itself until the app restarts.
