@@ -1,17 +1,20 @@
 """
-Prototype Bingo
-===============
+Prototype Bingo  (pygbag-compatible)
+====================================
 
 A small, fully working bingo board built with pygame.
+
+Run locally:      python main.py
+Run in browser:   pygbag .        (from the folder containing this main.py)
 
 Controls
 --------
 * Click a cell ............ mark / unmark it
 * "Edit Text" button ...... toggle edit mode, then click any cell to retype its label
-* "Background Image" ...... pick an image file to use as the background (needs tkinter)
+* "Background Image" ...... currently disabled
 * "Reset Marks" ........... clear all marks (the FREE centre stays marked)
 * "Shuffle" .............. shuffle the cell labels once per app run and clear marks
-* Keyboard shortcuts ...... E = edit mode, B = background, R = reset, Esc = leave edit mode
+* Keyboard shortcuts ...... E = edit mode, R = reset, Esc = leave edit mode
 
 While the text-entry box is open:
     Enter  -> save
@@ -19,21 +22,30 @@ While the text-entry box is open:
     Delete -> clear the box
 """
 
+import asyncio
 import json
 import math
 import os
 import random
+import sys
+
 import pygame
 
 # --------------------------------------------------------------------------
-# Optional tkinter (used only for the "choose background image" file dialog)
+# Platform detection
 # --------------------------------------------------------------------------
-try:
-    import tkinter as tk
-    from tkinter import filedialog
-    TK_OK = True
-except Exception:                                    # pragma: no cover
-    TK_OK = False
+IS_WEB = sys.platform == "emscripten"
+
+if IS_WEB:
+    import platform          # pygbag's platform module exposes platform.window
+    TK_OK = False            # no tkinter in the browser
+else:
+    try:
+        import tkinter as tk
+        from tkinter import filedialog
+        TK_OK = True
+    except Exception:        # pragma: no cover
+        TK_OK = False
 
 
 # --------------------------------------------------------------------------
@@ -63,8 +75,40 @@ DISABLED_TEXT  = (150, 155, 170)
 
 MAX_CELL_CHARS  = 120
 
-# Save file lives next to the script so it survives reruns
-SAVE_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "bingo_save.json")
+# Desktop: save file next to the script. Web: browser localStorage.
+SAVE_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                         "bingo_save.json")
+STORAGE_KEY = "prototype_bingo_save"
+
+
+# --------------------------------------------------------------------------
+# Storage backend (file on desktop, localStorage in the browser)
+# --------------------------------------------------------------------------
+def storage_read():
+    """Return the saved JSON string, or None if nothing is saved."""
+    if IS_WEB:
+        raw = platform.window.localStorage.getItem(STORAGE_KEY)
+        if raw is None:
+            return None
+        raw = str(raw)
+        return raw if raw and raw != "null" else None
+
+    if not os.path.exists(SAVE_FILE):
+        return None
+    with open(SAVE_FILE, "r", encoding="utf-8") as f:
+        return f.read()
+
+
+def storage_write(text):
+    if IS_WEB:
+        platform.window.localStorage.setItem(STORAGE_KEY, text)
+        return
+
+    tmp = SAVE_FILE + ".tmp"
+    with open(tmp, "w", encoding="utf-8") as f:
+        f.write(text)
+    os.replace(tmp, SAVE_FILE)     # atomic — never a half-written file
+
 
 # --------------------------------------------------------------------------
 # Text helpers
@@ -210,8 +254,16 @@ class BingoApp:
         key = (size, bold)
         font = self.font_cache.get(key)
         if font is None:
-            font = pygame.font.SysFont(
-                "arial,helvetica,dejavusans,freesans", size, bold=bold)
+            if IS_WEB:
+                # SysFont isn't available in the browser; use pygame's
+                # built-in font. It renders a bit smaller than Arial at the
+                # same nominal size, so scale it up. (Or bundle a .ttf and
+                # load it with pygame.font.Font("myfont.ttf", size).)
+                font = pygame.font.Font(None, int(size * 1.3))
+                font.set_bold(bold)
+            else:
+                font = pygame.font.SysFont(
+                    "arial,helvetica,dejavusans,freesans", size, bold=bold)
             self.font_cache[key] = font
         return font
 
@@ -280,7 +332,7 @@ class BingoApp:
     def reset_marks(self):
         self.marked = [[False] * 5 for _ in range(5)]
         self.marked[2][2] = True
-        self.save_state()  
+        self.save_state()
         self.set_toast("Marks cleared")
 
     def shuffle_blocks(self):
@@ -313,22 +365,27 @@ class BingoApp:
             "marked": self.marked,
         }
         try:
-            tmp = SAVE_FILE + ".tmp"
-            with open(tmp, "w", encoding="utf-8") as f:
-                json.dump(data, f, indent=2, ensure_ascii=False)
-            os.replace(tmp, SAVE_FILE)     # atomic — never a half-written file
-        except OSError as exc:
+            storage_write(json.dumps(data, indent=2, ensure_ascii=False))
+        except Exception as exc:
             self.set_toast(f"Could not save: {exc}", 3500)
 
     def load_state(self):
-        if not os.path.exists(SAVE_FILE):
+        try:
+            raw = storage_read()
+        except Exception as exc:
+            self.set_toast(f"Save unreadable, using defaults: {exc}", 4000)
+            return
+
+        if raw is None:
             return                          # first run — keep defaults
 
         try:
-            with open(SAVE_FILE, "r", encoding="utf-8") as f:
-                data = json.load(f)
-        except (OSError, json.JSONDecodeError) as exc:
-            self.set_toast(f"Save file unreadable, using defaults: {exc}", 4000)
+            data = json.loads(raw)
+        except json.JSONDecodeError as exc:
+            self.set_toast(f"Save unreadable, using defaults: {exc}", 4000)
+            return
+
+        if not isinstance(data, dict):
             return
 
         texts = data.get("texts")
@@ -363,8 +420,9 @@ class BingoApp:
         self.input_text = self.texts[cell[0]][cell[1]]
 
     def choose_background(self):
+        # Desktop only: needs tkinter. (Currently not wired to a button.)
         if not TK_OK:
-            self.set_toast("tkinter not installed — can't open file dialog", 3500)
+            self.set_toast("File dialog not available here", 3500)
             return
 
         root = None
@@ -421,8 +479,6 @@ class BingoApp:
                 self.edit_mode = False
             elif event.key == pygame.K_e:
                 self.on_button("text")
-            #elif event.key == pygame.K_b:
-            #    self.on_button("bg")
             elif event.key == pygame.K_r:
                 self.on_button("reset")
             return
@@ -442,7 +498,7 @@ class BingoApp:
                 else:
                     r, c = cell
                     self.marked[r][c] = not self.marked[r][c]
-                    self.save_state()  
+                    self.save_state()
 
     def handle_typing(self, event):
         if event.type != pygame.KEYDOWN:
@@ -642,11 +698,11 @@ class BingoApp:
             pygame.draw.rect(self.screen, color, rect, border_radius=14)
             if hover:
                 pygame.draw.rect(self.screen, (255, 255, 255), rect,
-                                width=2, border_radius=14)
+                                 width=2, border_radius=14)
 
             text_color = DISABLED_TEXT if disabled else WHITE
             surf = self.render_fitted(labels[key], rect.w - 26,
-                                    rect.h * 0.42, text_color, bold=True)
+                                      rect.h * 0.42, text_color, bold=True)
             self.screen.blit(surf, surf.get_rect(center=rect.center))
 
     def draw_input_overlay(self):
@@ -713,20 +769,20 @@ class BingoApp:
                 pass
 
     # ======================================================================
-    # Main loop
+    # Main loop  (async so pygbag can yield to the browser every frame)
     # ======================================================================
-    def run(self):
+    async def run(self):
         while self.running:
             self.clock.tick(60)
             for event in pygame.event.get():
                 self.handle_event(event)
             self.draw()
+            await asyncio.sleep(0)      # REQUIRED for pygbag
         pygame.quit()
 
 
-def main():
-    BingoApp().run()
+async def main():
+    await BingoApp().run()
 
 
-if __name__ == "__main__":
-    main()
+asyncio.run(main())
