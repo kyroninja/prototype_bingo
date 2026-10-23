@@ -55,8 +55,18 @@ BG_TOP          = (26, 28, 46)
 BG_BOTTOM       = (11, 12, 20)
 PANEL_ALPHA     = (8, 9, 16, 160)
 
-CELL_FACE       = (244, 246, 252)
-CELL_FACE_HOVER = (255, 255, 255)
+CELL_COLORS = (
+    (132, 245, 255),
+    (190, 255, 126),
+    (255, 143, 218),
+    (255, 202, 112),
+)
+CELL_COLORS_HOVER = (
+    (178, 250, 255),
+    (214, 255, 170),
+    (255, 184, 232),
+    (255, 222, 160),
+)
 CELL_MARKED     = (228, 66, 92)
 CELL_MARKED_HOV = (250, 100, 122)
 CELL_TEXT       = (28, 30, 44)
@@ -165,6 +175,10 @@ class BingoApp:
         self.texts = [[f"{letters[c]}{starts[c] + r}" for c in range(5)]
                       for r in range(5)]
         self.texts[2][2] = "FREE"
+        self.cell_colors = [
+            [random.randrange(len(CELL_COLORS)) for _ in range(5)]
+            for _ in range(5)
+        ]
 
         self.marked = [[False] * 5 for _ in range(5)]
         self.marked[2][2] = True
@@ -599,7 +613,9 @@ class BingoApp:
                 if marked:
                     face = CELL_MARKED_HOV if hover else CELL_MARKED
                 else:
-                    face = CELL_FACE_HOVER if hover else CELL_FACE
+                    color_index = self.cell_colors[r][c]
+                    face = (CELL_COLORS_HOVER[color_index] if hover
+                            else CELL_COLORS[color_index])
 
                 pygame.draw.rect(self.screen, face, rect, border_radius=12)
 
