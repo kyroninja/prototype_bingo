@@ -10,6 +10,7 @@ Controls
 * "Edit Text" button ...... toggle edit mode, then click any cell to retype its label
 * "Background Image" ...... pick an image file to use as the background (needs tkinter)
 * "Reset Marks" ........... clear all marks (the FREE centre stays marked)
+* "Shuffle" .............. shuffle the cell labels once per app run and clear marks
 * Keyboard shortcuts ...... E = edit mode, B = background, R = reset, Esc = leave edit mode
 
 While the text-entry box is open:
@@ -21,6 +22,7 @@ While the text-entry box is open:
 import json
 import math
 import os
+import random
 import pygame
 
 # --------------------------------------------------------------------------
@@ -127,6 +129,7 @@ class BingoApp:
         self.edit_mode = False
         self.editing = None            # (row, col) while the typing box is open
         self.input_text = ""
+        self.shuffle_used = False
 
         # ---------------- background ----------------
         self.bg_image = None
@@ -175,12 +178,13 @@ class BingoApp:
         self.board_rect = pygame.Rect(bx, by, size, size)
         self.cell_size = size / 5.0
 
-        bw = (W - 2 * margin - 2 * gap) // 3
+        bw = (W - 2 * margin - 3 * gap) // 4
         y = H - margin - btn_h
         self.buttons = {
             "bg":    pygame.Rect(margin, y, bw, btn_h),
             "text":  pygame.Rect(margin + bw + gap, y, bw, btn_h),
             "reset": pygame.Rect(margin + 2 * (bw + gap), y, bw, btn_h),
+            "shuffle": pygame.Rect(margin + 3 * (bw + gap), y, bw, btn_h),
         }
 
     def cell_rect(self, r, c):
@@ -279,6 +283,20 @@ class BingoApp:
         self.save_state()  
         self.set_toast("Marks cleared")
 
+    def shuffle_blocks(self):
+        positions = [(r, c) for r in range(5) for c in range(5)
+                     if (r, c) != (2, 2)]
+        labels = [self.texts[r][c] for r, c in positions]
+        random.shuffle(labels)
+
+        for (r, c), label in zip(positions, labels):
+            self.texts[r][c] = label
+
+        self.reset_marks()
+        self.fit_cache.clear()
+        self.shuffle_used = True
+        self.set_toast("Blocks shuffled")
+
     # ======================================================================
     # Persistence
     # ======================================================================
@@ -337,6 +355,8 @@ class BingoApp:
                            if self.edit_mode else "Edit mode off")
         elif key == "reset":
             self.reset_marks()
+        elif key == "shuffle" and not self.shuffle_used:
+            self.shuffle_blocks()
 
     def begin_edit(self, cell):
         self.editing = cell
@@ -604,10 +624,12 @@ class BingoApp:
             "bg": "Background Image",
             "text": "Done Editing" if self.edit_mode else "Edit Text",
             "reset": "Reset Marks",
+            "shuffle": "Shuffle",
         }
 
         for key, rect in self.buttons.items():
-            disabled = (key == "bg")
+            disabled = (key == "bg" or
+                        (key == "shuffle" and self.shuffle_used))
             hover = (not disabled) and can_hover and rect.collidepoint(mouse)
 
             if disabled:
