@@ -59,16 +59,11 @@ picker](#re-enabling-the-background-picker).
 
 ## Requirements
 
-  Package    Version     Notes
-  ---------- ----------- -------------------------
-  Python     3.8+        Tested on 3.10 and 3.12
-  `pygame`   \>= 2.0.0   The only pip dependency
+  Python     3.8+        Tested on 3.10
+  `pygame-ce`   \= 2.5.8   The only pip dependency
 
 Optional:
 
-  -------------------------------------------------------------------------
-  Package                             When it's needed
-  ----------------------------------- -------------------------------------
   `tkinter`                           Only if you re-enable the background
                                       picker. Ships with Python on
                                       Windows/macOS. On Debian/Ubuntu:
@@ -77,12 +72,10 @@ Optional:
                                       `sudo dnf install python3-tkinter`.
                                       On Arch: `sudo pacman -S tk`.
 
-  -------------------------------------------------------------------------
-
 The `requirements.txt` is a single line:
 
 ``` text
-pygame>=2.0.0
+pygame-ce==2.5.8
 ```
 
 ## Installation
@@ -111,17 +104,17 @@ whatever space is available; buttons and text scale with it.
 
 ## Controls
 
-  Action                   How
-  ------------------------ ----------------------------------------
-  Mark / unmark a cell     Left-click the cell
-  Enter edit mode          Click "Edit Text" or press `E`
-  Leave edit mode          Click "Edit Text" again or press `Esc`
-  Edit a cell's text       In edit mode, click the cell
-  Save a text edit         `Enter` in the popup box
-  Cancel a text edit       `Esc` in the popup box
-  Clear the popup's text   `Delete` in the popup box
-  Clear all marks          Click "Reset Marks" or press `R`
-  Quit                     Close the window
+| Action | Instruction |
+|---|---|
+| Mark / unmark a cell | Left-click the cell |
+| Enter edit mode | Click "Edit Text" or press `E` |
+| Leave edit mode | Click "Edit Text" again or press `Esc` |
+| Edit a cell's text | In edit mode, click the cell |
+| Save a text edit | Press `Enter` in the popup box |
+| Cancel a text edit | Press `Esc` in the popup box |
+| Clear the popup's text | Press `Delete` in the popup box |
+| Clear all marks | Click "Reset Marks" or press `R` |
+| Quit | Close the window |
 
 The FREE center square stays marked when you reset. Marks and edits are
 saved automatically --- there's no manual save step.
@@ -203,39 +196,16 @@ If you're putting this in a git repo, add `bingo_save.json` to
 
 Everything lives in `bingo.py` as module-level constants near the top:
 
-  -----------------------------------------------------------------------
-  Constant                Default                 What it does
-  ----------------------- ----------------------- -----------------------
-  `MAX_CELL_CHARS`        `40`                    Max characters you can
-                                                  type into one cell.
-                                                  Raise it for long-form
-                                                  labels.
-
-  `SAVE_FILE`             `bingo_save.json` next  Where autosave writes.
-                          to the script           
-
-  `CELL_FACE` /           Pale greys              Unmarked cell colours.
-  `CELL_FACE_HOVER`                               
-
-  `CELL_MARKED` /         Red / bright red        Marked cell colours.
-  `CELL_MARKED_HOV`                               
-
-  `CELL_TEXT` /           Dark / white            Text colours for
-  `CELL_TEXT_MARK`                                unmarked / marked
-                                                  cells.
-
-  `BUTTON`,               Blues / ambers          Button colours.
-  `BUTTON_HOVER`,                                 
-  `BUTTON_EDIT`,                                  
-  `BUTTON_EDIT_HOV`                               
-
-  `DISABLED`,             Greys                   The disabled
-  `DISABLED_TEXT`                                 background-picker
-                                                  button.
-
-  `GOLD`                  Amber                   Winning-line highlight
-                                                  colour.
-  -----------------------------------------------------------------------
+| Constant | Default | What it does |
+|---|---|---|
+| `MAX_CELL_CHARS` | `40` | Max characters you can type into one cell. Raise it for long-form labels. |
+| `SAVE_FILE` | `bingo_save.json` next to the script | Where autosave writes. |
+| `CELL_FACE` / `CELL_FACE_HOVER` | Pale greys | Unmarked cell colours. |
+| `CELL_MARKED` / `CELL_MARKED_HOV` | Red / bright red | Marked cell colours. |
+| `CELL_TEXT` / `CELL_TEXT_MARK` | Dark / white | Text colours for unmarked / marked cells. |
+| `BUTTON`, `BUTTON_HOVER`, `BUTTON_EDIT`, `BUTTON_EDIT_HOV` | Blues / ambers | Button colours. |
+| `DISABLED`, `DISABLED_TEXT` | Greys | The disabled background-picker button. |
+| `GOLD` | Amber | Winning-line highlight colour. |
 
 Default board content is set in `BingoApp.__init__`:
 
@@ -258,7 +228,7 @@ edit the cells in the app.
 ├── bingo_save.json     # created on first edit (gitignored)
 ├── requirements.txt
 ├── README.md
-└── screenshot.png      # optional
+└── screenshot.png
 ```
 
 `bingo.py` is laid out top to bottom as:
@@ -435,15 +405,12 @@ ask for:
 -   Keep the honest tone in the README. No "blazing fast", no "✨
     Features ✨", no bullet-point marketing. It's a tool, not a launch.
 
-Bug reports are welcome. Feature requests are welcome but I'll probably
-say "yes, that's in the roadmap" and then not do it for a year ---
-that's just how hobby tools go.
+Bug reports are welcome. Feature requests are welcome
 
 ## License
 
 MIT. Use it, fork it, sell it, whatever. See `LICENSE` for the exact
-text --- or if there's no `LICENSE` file yet, MIT terms apply to
-whatever you find in this repo.
+text
 
 ## Changelog
 
